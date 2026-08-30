@@ -1,0 +1,55 @@
+Chemistry tables for the dysbiosis → TMAO/LPS → ROS/HIF-1α → aortic ECM cascade
+
+1. Key chemical species
+
+| Species | Formula / Structure | Role in pathway | Notes |
+|---------|---------------------|-----------------|-------|
+| Choline | \(\mathrm{C_5H_{14}NO^+}\) | Dietary precursor | Converted by gut microbes |
+| TMA (trimethylamine) | \(\mathrm{(CH_3)_3N}\) | Intermediate | Volatile, fishy odor |
+| TMAO | \(\mathrm{(CH_3)_3NO}\) / \(\mathrm{C_3H_9NO}\) | Key driver | Hepatic oxidation product |
+| LPS | Lipid A + core + O-antigen (variable MW ~10–20 kDa) | Endotoxin | Gram-negative outer membrane |
+| ROS (\(\mathrm{O_2^{\bullet-}}\), \(\mathrm{H_2O_2}\)) | Superoxide, hydrogen peroxide | Oxidative stress | From NOX / mitochondria |
+| HIF-1α | Protein (~826 aa) | Transcription factor | Stabilized by ROS |
+| MMP-2 / MMP-9 | Zn-dependent endopeptidases | Matrix proteases | Cleave collagen & elastin |
+| Elastin | Cross-linked tropoelastin polymer | Structural ECM | Provides elasticity |
+| Collagen I/III | Triple-helix \(\mathrm{(Gly-X-Y)_n}\) | Structural ECM | Tensile strength |
+| NADPH / O₂ | Cofactors | FMO3 reaction | Required for TMAO synthesis |
+
+2. Core chemical / biochemical reactions
+
+| Step | Reaction | Enzyme / Catalyst | Location |
+|------|----------|-------------------|----------|
+| 1 | Choline → TMA + acetaldehyde | CutC/D (glycyl-radical lyase) | Gut lumen (microbiota) |
+| 2 | \(\mathrm{(CH_3)_3N + O_2 + NADPH + H^+ \to (CH_3)_3NO + NADP^+ + H_2O}\) | FMO3 (flavin monooxygenase 3) | Hepatocytes |
+| 3 | LPS + TLR4/MD-2 → MyD88 → NF-κB + NOX2 activation | TLR4 signaling | Endothelium / VSMCs |
+| 4 | \(\mathrm{2O_2^{\bullet-} + 2H^+ \to H_2O_2 + O_2}\) | Superoxide dismutase (SOD) | Cytosol / mitochondria |
+| 5 | ROS inhibit PHDs → HIF-1α stabilization | Prolyl-hydroxylase domain enzymes | Cytosol / nucleus |
+| 6 | HIF-1α + HIF-1β → HRE binding → ↑MMP transcription | Transcriptional complex | Nucleus |
+| 7 | Collagen / Elastin + H₂O → peptide fragments | MMP-2 / MMP-9 (Zn²⁺ active site) | Aortic media / adventitia |
+
+3. Simplified stoichiometric matrix (selected reactions)
+
+Rows = species; columns = reactions (R1–R4). Positive = production, negative = consumption.
+
+| Species     | R1 (CutC) | R2 (FMO3) | R3 (ROS gen.) | R4 (MMP) |
+|-------------|-----------|-----------|---------------|----------|
+| Choline     | –1        | 0         | 0             | 0        |
+| TMA         | +1        | –1        | 0             | 0        |
+| TMAO        | 0         | +1        | 0             | 0        |
+| O₂          | 0         | –1        | –1 (approx.)  | 0        |
+| NADPH       | 0         | –1        | 0             | 0        |
+| H₂O₂ / ROS  | 0         | 0         | +1            | 0        |
+| Collagen/Elastin | 0    | 0         | 0             | –1       |
+| Peptides    | 0         | 0         | 0             | +1       |
+
+4. Aortic ECM composition matrix (approximate mass fractions in healthy media)
+
+| Component          | Approx. % dry weight | Primary function          | Degradation by |
+|--------------------|----------------------|---------------------------|----------------|
+| Elastin            | 30–50 %             | Elastic recoil            | MMP-2, MMP-9, MMP-12 |
+| Collagen I         | 20–30 %             | Tensile strength          | MMP-1, MMP-8, MMP-13 |
+| Collagen III       | 10–20 %             | Compliance / fine structure | MMP-1, MMP-3, MMP-9 |
+| Proteoglycans      | 5–10 %              | Hydration / signaling     | Various MMPs / ADAMTS |
+| VSMC cytoskeleton  | Variable            | Contractile / synthetic phenotype | Apoptosis (caspase) |
+
+These tables summarize the chemical species, reactions, stoichiometry, and matrix composition that underlie the ODE system previously integrated by Runge–Kutta methods.
