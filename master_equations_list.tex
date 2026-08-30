@@ -8,18 +8,127 @@ State variables
 (M) = [MMP activity] (primarily MMP-2/9)
 (E) = aortic ECM integrity (elastin + collagen mass fraction)
 (D) = dysbiosis drive (external input / parameter)
-Master rate equations
+Complete list of equations from the aortic-cavitation / gut–heart–lung (tropism) model and its quantitative couplings.
+
+1. Repository master biochemical ODEs
 \[
 \begin{align*}
-\frac{dT}{dt} &= k_T\, D - \delta_T\, T \\[6pt]
-\frac{dL}{dt} &= k_L\, D - \delta_L\, L \\[6pt]
-\frac{dR}{dt} &= \alpha_T\, T + \alpha_L\, L - \delta_R\, R \\[6pt]
-\frac{dH}{dt} &= \beta\, R\, (H_{\max} - H) - \delta_H\, H \\[6pt]
-\frac{dM}{dt} &= \gamma_H\, H + \gamma_R\, R - \delta_M\, M \\[6pt]
-\frac{dE}{dt} &= p - \mu\, M\, E
+\frac{dT}{dt} &= k_T D - \delta_T T \\
+\frac{dL}{dt} &= k_L D - \delta_L L \\
+\frac{dR}{dt} &= \alpha_T T + \alpha_L L - \delta_R R \\
+\frac{dH}{dt} &= \beta R (H_{\max} - H) - \delta_H H \\
+\frac{dM}{dt} &= \gamma_H H + \gamma_R R - \delta_M M \\
+\frac{dE}{dt} &= p - \mu M E
 \end{align*}
 \]
-Parameter meanings (brief)
-SymbolMeaning\(k_T, k_L\)Production rates of TMAO / LPS from dysbiosis\(\delta_T, \delta_L, \delta_R, \delta_H, \delta_M\)First-order clearance / decay rates\(\alpha_T, \alpha_L\)ROS generation coefficients from TMAO / LPS\(\beta\)ROS-dependent HIF-1α stabilization rate\(H_{\max}\)Maximum HIF-1α level\(\gamma_H, \gamma_R\)MMP induction by HIF-1α / ROS(p)Basal ECM synthesis rate\(\mu\)MMP-catalyzed ECM degradation coefficient
-These six coupled ODEs constitute the master equation set of the reduced model. They were previously integrated numerically with adaptive Runge–Kutta (RK45) methods and are fully consistent with the chemical reaction tables supplied earlier.  
-(If a fully stochastic chemical master equation formulation on molecule counts is required, it can be written from the same underlying reactions using the propensity functions of the corresponding birth–death processes.)
+
+2. Extended biochemical ODEs (with mechanotransduction + cavitation)
+\[
+\begin{align*}
+\frac{dT}{dt} &= k_T D - \delta_T T \\
+\frac{dL}{dt} &= k_L D - \delta_L L \\
+\frac{dR}{dt} &= \alpha_T T + \alpha_L L + \alpha_\tau \overline{\tau}w + \alpha\sigma \overline{\sigma} - \delta_R R \\
+\frac{dH}{dt} &= \beta R (H_{\max} - H) - \delta_H H \\
+\frac{dM}{dt} &= \gamma_H H + \gamma_R R + \gamma_\varepsilon \phi(\overline{\varepsilon}) - \delta_M M \\
+\frac{dE}{dt} &= p - \mu M E - \kappa\, q(\text{cavitation indicator})
+\end{align*}
+\]
+
+3. Analytic Biochemical Jacobian matrix
+\[
+J = \frac{\partial\mathbf{f}}{\partial\mathbf{y}} =
+\begin{pmatrix}
+-\delta_T & 0 & 0 & 0 & 0 & 0 \\
+0 & -\delta_L & 0 & 0 & 0 & 0 \\
+\alpha_T & \alpha_L & -\delta_R & 0 & 0 & 0 \\
+0 & 0 & \beta(H_{\max}-H) & -\beta R-\delta_H & 0 & 0 \\
+0 & 0 & \gamma_R & \gamma_H & -\delta_M & 0 \\
+0 & 0 & 0 & 0 & -\mu E & -\mu M - \kappa\cdot\text{cav}
+\end{pmatrix}
+\]
+(plus additional entries from mechanotransduction source terms).
+
+4. Stoichiometric matrix (repository)
+\[
+S =
+\begin{array}{c|cccc}
+& R1 & R2 & R3 & R4 \\
+\hline
+\text{Choline} & -1 & 0 & 0 & 0 \\
+\text{TMA} & +1 & -1 & 0 & 0 \\
+\text{TMAO} & 0 & +1 & 0 & 0 \\
+\mathrm{O_2} & 0 & -1 & -1 & 0 \\
+\text{NADPH} & 0 & -1 & 0 & 0 \\
+\text{ROS} & 0 & 0 & +1 & 0 \\
+\text{ECM} & 0 & 0 & 0 & -1 \\
+\text{Peptides} & 0 & 0 & 0 & +1
+\end{array}
+\]
+
+5. Fluid equations (Navier–Stokes / ALE)
+\[
+\begin{align*}
+\rho_f\Bigl(\frac{\partial\mathbf{u}}{\partial t} + \mathbf{u}\cdot\nabla\mathbf{u}\Bigr)
+&= -\nabla p + \nabla\cdot\boldsymbol{\tau} + \mathbf{f}, \\
+\nabla\cdot\mathbf{u} &= 0.
+\end{align*}
+\]
+
+6. Solid momentum balance (finite-strain)
+\[
+\rho_s\frac{\partial^2\boldsymbol{\chi}}{\partial t^2} = \nabla_{\mathbf{X}}\cdot\mathbf{P} + \mathbf{b}.
+\]
+
+7. Anisotropic multi-layer strain-energy density (HGO-type, scaled by \(E\))
+For each layer \(\alpha\in\{\text{I},\text{M},\text{A}\}\):
+\[
+\Psi^\alpha(\mathbf{C},E) =
+\frac{\mu^\alpha(E)}{2}(I_1-3)
+\sum_i\frac{k_1^{\alpha,i}(E)}{2k_2^{\alpha,i}}
+\Bigl\{\exp\bigl[k_2^{\alpha,i}(\kappa^\alpha I_1+(1-3\kappa^\alpha)I_4^i-1)^2\bigr]-1\Bigr\}
+\Psi_{\rm vol}(J),
+\]
+with
+\[
+\mu^\alpha(E)=\mu_0^\alpha\,E,\qquad k_1^{\alpha,i}(E)=k_{1,0}^{\alpha,i}\,E.
+\]
+
+8. Fluid–structure interface conditions
+\[
+\mathbf{u}=\frac{\partial\boldsymbol{\chi}}{\partial t},
+\qquad
+\mathbf{P}\mathbf{N}=-p\mathbf{n}+\boldsymbol{\tau}\mathbf{n}
+\quad\text{on }\Gamma_{fs}(t).
+\]
+
+9. Weak-coupling block-triangular system
+\[
+\begin{pmatrix}
+\mathcal{F} & \mathcal{C}_{fs} & 0 \\
+\mathcal{C}{sf} & \mathcal{S}{\rm aniso}(E^n) & 0 \\
+0 & 0 & \mathcal{B}_{\rm RK}(J)
+\end{pmatrix}
+\begin{pmatrix}
+\mathbf{u},p \\
+\boldsymbol{\chi} \\
+\mathbf{y}
+\end{pmatrix}
+=
+\begin{pmatrix}
+\mathbf{f}_f \\
+\mathbf{f}_s \\
+\mathbf{f}_b(\overline{\tau}_w,\overline{\sigma},\overline{\varepsilon})
+\end{pmatrix}.
+\]
+
+10. Cavitation criterion (Bernoulli estimate)
+\[
+p(\mathbf{x},t) < p_v + \tfrac12\rho|\mathbf{u}|^2.
+\]
+
+11. Rayleigh–Plesset bubble dynamics (optional micro-mechanical module)
+\[
+R_b\ddot{R}b + \tfrac32\dot{R}_b^2 = \frac{1}{\rho}\Bigl(p_g - p\infty - \frac{2\sigma}{R_b}-4\mu\frac{\dot{R}_b}{R_b}\Bigr).
+\]
+
+These are all the principal equations used in the formulations above. 
