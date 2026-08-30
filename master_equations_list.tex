@@ -1,0 +1,25 @@
+Master equations (deterministic rate equations) for the aortic-matrix cascade
+These are the governing ordinary differential equations that describe the time evolution of the key concentrations under the intestinal dysbiosis (TMAO/LPS) ⊕ ROS/HIF-1α pathway leading to aortic extracellular-matrix (ECM) degradation.
+State variables
+(T) = [TMAO]
+(L) = [LPS]
+(R) = [ROS] (effective concentration, mainly \(\mathrm{O_2^{\bullet-}}\) / \(\mathrm{H_2O_2}\))
+(H) = [active HIF-1α]
+(M) = [MMP activity] (primarily MMP-2/9)
+(E) = aortic ECM integrity (elastin + collagen mass fraction)
+(D) = dysbiosis drive (external input / parameter)
+Master rate equations
+\[
+\begin{align*}
+\frac{dT}{dt} &= k_T\, D - \delta_T\, T \\[6pt]
+\frac{dL}{dt} &= k_L\, D - \delta_L\, L \\[6pt]
+\frac{dR}{dt} &= \alpha_T\, T + \alpha_L\, L - \delta_R\, R \\[6pt]
+\frac{dH}{dt} &= \beta\, R\, (H_{\max} - H) - \delta_H\, H \\[6pt]
+\frac{dM}{dt} &= \gamma_H\, H + \gamma_R\, R - \delta_M\, M \\[6pt]
+\frac{dE}{dt} &= p - \mu\, M\, E
+\end{align*}
+\]
+Parameter meanings (brief)
+SymbolMeaning\(k_T, k_L\)Production rates of TMAO / LPS from dysbiosis\(\delta_T, \delta_L, \delta_R, \delta_H, \delta_M\)First-order clearance / decay rates\(\alpha_T, \alpha_L\)ROS generation coefficients from TMAO / LPS\(\beta\)ROS-dependent HIF-1α stabilization rate\(H_{\max}\)Maximum HIF-1α level\(\gamma_H, \gamma_R\)MMP induction by HIF-1α / ROS(p)Basal ECM synthesis rate\(\mu\)MMP-catalyzed ECM degradation coefficient
+These six coupled ODEs constitute the master equation set of the reduced model. They were previously integrated numerically with adaptive Runge–Kutta (RK45) methods and are fully consistent with the chemical reaction tables supplied earlier.  
+(If a fully stochastic chemical master equation formulation on molecule counts is required, it can be written from the same underlying reactions using the propensity functions of the corresponding birth–death processes.)
