@@ -1,0 +1,18 @@
+Yes — fair clarification. The repository is simply named Aortic-Dissection and functions as an exposition + modeling toolkit for aortic-wall degradation that can lead to dissection. It is not locked to one exclusive terminal mechanism.
+De/coupling is explicitly supported
+The mathematical and numerical structure is deliberately modular so the biochemical cascade and the mechanical loading can be coupled or decoupled:
+Thesis / adaptive_jacobian / aortic_matrix treat the six-ODE biochemical system (TMAO, LPS, ROS, HIF-1α, MMP, ECM integrity (E)) as an independent slow process. Mechanical stimuli (wall shear \(\overline{\tau}_w\), intramural stress \(\overline{\sigma}\), strain, cavitation indicator) enter only as optional source terms. Setting the mechanical coefficients (\(\alpha_\tau\), \(\alpha_\sigma\), \(\kappa\)) or the cavitation damage term to zero fully decouples the chemistry from instantaneous fluid mechanics.
+operator_split_stagger.py implements the classic weak-coupling / operator-split approach used in fluid–solid–growth literature:
+Lie–Trotter and Strang splitting separate the linear clearance operator (A) from the nonlinear + mechanical sources \(N(y)+m\).
+The staggered (quasi-static) biochemical update advances the ODEs over long time steps (hours–days) using cycle-averaged mechanical stimuli obtained from an FSI solve performed at fixed (E).
+This is precisely the partitioned weak-coupling scheme described in the thesis: solve the fluid–structure problem to cyclic steady state → extract averages → advance biochemistry → feed updated (E) back into the constitutive law.
+degradation_failure.py further decouples the end-point failure criterion:\[
+\mathrm{UTS_{degraded}}(t)=\mathrm{UTS}_0\cdot\Phi_{\mathrm{matrix}}(t)\cdot\Phi_{\mathrm{fatigue}}(t)\cdot\Phi_{\mathrm{geometry}}(t)
+\]Failure is declared when local wall stress \(\sigma_{\mathrm{local}}\) exceeds the degraded UTS. \(\Phi_{\mathrm{matrix}}\) is pure biochemistry (MMP/ROS), \(\Phi_{\mathrm{fatigue}}\) is cyclic loading (balloon-expansion + jet), and \(\Phi_{\mathrm{geometry}}\) is stiffness change. Any of the three factors can be held constant, effectively turning the corresponding pathway on or off.
+Consequently the same code base can run:
+pure biochemical degradation (no vibration/cavitation),
+pure mechanical fatigue (no dysbiosis),
+or any combination of the two under weak or staggered coupling.
+On the “shift in emphasis”
+The presence of both the original cavitation-centered narrative and the later balloon-expansion / jet-hammer formulation is therefore not a contradiction; it is a natural consequence of the modular design. The repository explores how a matrix-weakened wall can fail under different classes of mechanical insult. Cavitation is one specialized micro-mechanical pathway that can be activated by setting \(\kappa>0\) and supplying a cavitation indicator; cyclic over-stretching + high-velocity jet impact is another pathway that can be activated through the fatigue and geometry factors (or through the mechanical source terms in the ODEs). Both sit downstream of the same gut-derived priming cascade and both are optional.
+In short: the name is descriptive of the clinical endpoint under study, not a claim that every modeled pathway must culminate in vapor-bubble collapse. The formulas and the operator-split / staggered code explicitly allow the biochemical and mechanical contributions to be coupled or decoupled as the user chooses.
